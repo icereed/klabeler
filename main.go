@@ -1,6 +1,6 @@
 package main
 
-import "klabeler/cmd"
+import "github.com/icereed/klabeler/cmd"
 
 func main() {
 	cmd.Execute()

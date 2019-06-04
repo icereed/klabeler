@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/icereed/klabeler/internal/pkg/entities"
+
 	"github.com/Jeffail/gabs"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -45,19 +47,17 @@ resources in your cluster are maybe orphaned.`,
 				return
 			}
 
-			jsonParsed, err := gabs.ParseJSON(jsonData)
+			processedJSON, err := applyCurrentGitHash(string(jsonData), cmd.Flag("prefix").Value.String())
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				return
 			}
 
-			path := "."
-			revision := "HEAD"
-
-			r, err := git.PlainOpen(path)
-			h, err := r.ResolveRevision(plumbing.Revision(revision))
-
-			jsonParsed.Set(h.String(), "metadata", "labels", cmd.Flag("prefix").Value.String()+"git-hash")
+			jsonParsed, err := gabs.ParseJSON([]byte(processedJSON))
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
 
 			jsonObj.ArrayAppend(jsonParsed.Data(), "output")
 		}
@@ -71,6 +71,24 @@ resources in your cluster are maybe orphaned.`,
 			fmt.Println(yamlOutput)
 		}
 	},
+}
+
+func applyCurrentGitHash(jsonData string, keyPrefix string) (string, error) {
+	labeler, err := entities.NewSingleObjectLabeler(jsonData)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return "", err
+	}
+
+	path := "."
+	revision := "HEAD"
+
+	r, err := git.PlainOpen(path)
+	h, err := r.ResolveRevision(plumbing.Revision(revision))
+
+	labeler.SetLabelPrefix(keyPrefix)
+	labeler.ApplyLabel("git-hash", h.String())
+	return labeler.GetJSON(), nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
