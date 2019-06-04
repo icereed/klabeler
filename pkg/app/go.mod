@@ -1,4 +1,4 @@
-module github.com/icereed/klabeler/internal/pkg/app
+module github.com/icereed/klabeler/pkg/app
 
 go 1.12
 
@@ -12,4 +12,4 @@ require (
 	sigs.k8s.io/yaml v1.1.0
 )
 
-replace github.com/icereed/klabeler/internal/pkg/entities => ../entities
+replace github.com/icereed/klabeler/internal/pkg/entities => ../../internal/pkg/entities

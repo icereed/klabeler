@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/google/go-cmp v0.3.0 // indirect
-	github.com/icereed/klabeler/internal/pkg/app v0.0.0-00010101000000-000000000000
+	github.com/icereed/klabeler/pkg/app v0.0.0-00010101000000-000000000000
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/viper v1.4.0
@@ -14,4 +14,4 @@ require (
 
 replace github.com/icereed/klabeler/internal/pkg/entities => ../internal/pkg/entities
 
-replace github.com/icereed/klabeler/internal/pkg/app => ../internal/pkg/app
+replace github.com/icereed/klabeler/pkg/app => ../pkg/app

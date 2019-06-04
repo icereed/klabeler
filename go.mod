@@ -8,4 +8,4 @@ replace github.com/icereed/klabeler/cmd => ./cmd
 
 replace github.com/icereed/klabeler/internal/pkg/entities => ./internal/pkg/entities
 
-replace github.com/icereed/klabeler/internal/pkg/app => ./internal/pkg/app
+replace github.com/icereed/klabeler/pkg/app => ./pkg/app
