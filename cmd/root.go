@@ -32,7 +32,10 @@ resources in your cluster are maybe orphaned.`,
 			panic(err)
 		}
 
-		yamlOutput := klabeler.ApplyCurrentGitHash().GetYAML()
+		yamlOutput := klabeler.
+			SetLabelPrefix(cmd.Flag("prefix").Value.String()).
+			ApplyCurrentGitHash().
+			GetYAML()
 
 		if yamlOutput != "{}" && yamlOutput != "" {
 			fmt.Println(yamlOutput)
