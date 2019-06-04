@@ -1,14 +1,19 @@
 package entities
 
-// SingleObjectLabeler represents the basic entity for any logic regarding labeling
-type SingleObjectLabeler interface {
+// GenericLabeler represents the basic entity for any logic regarding labeling
+type GenericLabeler interface {
 	SetLabelPrefix(prefix string)
-	ApplyLabel(key string, value string) error
+	ApplyLabel(key string, value string)
 	GetJSON() string
 }
 
-// NewSingleObjectLabeler creates a new instance of a SingleObjectLabeler
-func NewSingleObjectLabeler(json string) (SingleObjectLabeler, error) {
-	labeler, err := newGabsObjectLabeler(json)
-	return labeler, err
+// NewGenericLabeler creates a new instance of a GenericLabeler capable of dealing with single objects or arrays
+func NewGenericLabeler(json string) (GenericLabeler, error) {
+	isArray := checkIfJSONIsArray(json)
+
+	if isArray {
+		return NewMultiObjectLabeler(json)
+	}
+
+	return NewSingleObjectLabeler(json)
 }

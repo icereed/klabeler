@@ -1,8 +1,6 @@
 # klabeler
 
-> Still only a POC. Don't use it in production or even staging!
-
-Apply labels to k8s resources.
+Apply current git hash to Kubernetes resources.
 
 ## Install
 

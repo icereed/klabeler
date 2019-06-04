@@ -4,18 +4,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 
-	"github.com/icereed/klabeler/internal/pkg/entities"
-
-	"github.com/Jeffail/gabs"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/icereed/klabeler/internal/pkg/app"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	git "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"k8s.io/apimachinery/pkg/util/yaml"
-	sYaml "sigs.k8s.io/yaml"
 )
 
 var cfgFile string
@@ -33,62 +26,18 @@ resources in your cluster are maybe orphaned.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		bytes, err := ioutil.ReadAll(os.Stdin)
 
-		splittedContents := strings.Split(string(bytes), "\n---")
+		klabeler, err := app.NewKLabeler(string(bytes))
 
-		jsonObj := gabs.New()
-		jsonObj.Array("output")
-
-		for _, block := range splittedContents {
-
-			// convert to json
-			jsonData, err := yaml.ToJSON([]byte(block))
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-
-			processedJSON, err := applyCurrentGitHash(string(jsonData), cmd.Flag("prefix").Value.String())
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-
-			jsonParsed, err := gabs.ParseJSON([]byte(processedJSON))
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-
-			jsonObj.ArrayAppend(jsonParsed.Data(), "output")
-		}
-		rawYamlOutput, err := sYaml.JSONToYAML(jsonObj.Path("output").Bytes())
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+			panic(err)
 		}
-		yamlOutput := strings.TrimSpace(string(rawYamlOutput))
+
+		yamlOutput := klabeler.ApplyCurrentGitHash().GetYAML()
+
 		if yamlOutput != "{}" && yamlOutput != "" {
 			fmt.Println(yamlOutput)
 		}
 	},
-}
-
-func applyCurrentGitHash(jsonData string, keyPrefix string) (string, error) {
-	labeler, err := entities.NewSingleObjectLabeler(jsonData)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return "", err
-	}
-
-	path := "."
-	revision := "HEAD"
-
-	r, err := git.PlainOpen(path)
-	h, err := r.ResolveRevision(plumbing.Revision(revision))
-
-	labeler.SetLabelPrefix(keyPrefix)
-	labeler.ApplyLabel("git-hash", h.String())
-	return labeler.GetJSON(), nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
